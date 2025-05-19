@@ -15,7 +15,16 @@ arr = np.array(img)
 print(arr.shape)  # (784, 1200, 3) or (784, 1200) for grayscale
 print(arr[0])
 
+# setting the random elements.
+num_rand_pixels = random.randint(0,int(arr.shape[0] * arr.shape[1] / 4))
+print('Number of random pixels: ', num_rand_pixels)
 
+rand_pixel_matrix = []
+# randomly choosing where those random pixels should go:
+for i in range(num_rand_pixels):
+    rand_x = random.randint(0,arr.shape[0]-1)
+    rand_y = random.randint(0,arr.shape[1]-1)
+    arr[rand_x][rand_y] = random.randint(0,255)
 
 
 
@@ -28,4 +37,4 @@ for x in range(arr.shape[0]):
 
 img = Image.fromarray(arr)
 
-img.save(fp='output\\grey_cairn.jpg')
+img.save(fp='output\\rand_grey_cairn.jpg')
