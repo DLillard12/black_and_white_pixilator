@@ -7,7 +7,7 @@ import numpy as np
 from PIL import Image
 import random
 
-img = Image.open("input\\cairn.jpg")
+img = Image.open("input\\woman.jpg")
 img = img.convert(mode='L') # converting to greyscale
 
 # converting to a numpy array so we can set the pixel color.
@@ -37,4 +37,11 @@ for x in range(arr.shape[0]):
 
 img = Image.fromarray(arr)
 
-img.save(fp='output\\rand_grey_cairn.jpg')
+# pixelating, first trying to pixelate after the floor/ceiling function.
+
+resize_factor = 16
+tiny = img.resize(size=[int(arr.shape[1]/resize_factor),int(arr.shape[0]/resize_factor)])
+
+pixelated = tiny.resize(img.size,Image.BOX)   # resizing the smaller image to the original size
+
+pixelated.save(fp='output\\pixelated_rand_grey_woman.jpg')

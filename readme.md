@@ -11,3 +11,5 @@ Currently I think the following will have to happen:
 
 So it appears that the video had some random factor that was adding in pixels that were characterized 'incorrectly'
 I will be adding this stochastic element.
+
+I was having issues with pixelation, because I was using the wrong variable name! Took me forever to find.
