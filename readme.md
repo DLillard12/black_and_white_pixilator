@@ -22,11 +22,11 @@ I tried 127 for the binary threshold but that is a bit too high, setting it lowe
 
 Also I have noticed that while the video has binary white and black the pixels have a gradient, so there are grouping of pixels which are all black, all white, and inbetween there are groupings with a black or white X.
 E.G.
+
 BBB
 BBB
 BBB
----
+
 BWB
 WBW
 BWB
----
