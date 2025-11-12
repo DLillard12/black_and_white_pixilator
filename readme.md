@@ -24,9 +24,16 @@ Also I have noticed that while the video has binary white and black the pixels h
 E.G.
 
 BBB
+
 BBB
+
 BBB
 
 BWB
+
 WBW
+
 BWB
+
+
+I did a project for my COSC523 course where I got to do the above, I implemented it here.

@@ -14,6 +14,36 @@ import random
 # Functions
 # --------------
 
+# Defining buckets for pixel expansion
+# Just making 4 for now.
+def pixel_buckets(pixel_value : int):
+    if pixel_value < 63:
+        return np.array([
+                        [0, 0, 0],
+                        [0, 0, 0],
+                        [0, 0, 0]
+], dtype=float)
+    elif pixel_value < 126:
+        return np.array([
+                        [255, 0, 255],
+                        [0, 0, 0],
+                        [255, 0, 255]
+], dtype=float)
+    elif pixel_value < 189:
+        return np.array([
+                        [0, 255, 0],
+                        [255, 255, 255],
+                        [0, 255, 0]
+], dtype=float)
+    elif pixel_value < 256:
+        return np.array([
+                        [255, 255, 255],
+                        [255, 255, 255],
+                        [255, 255, 255]
+], dtype=float)
+    else:
+        return 255
+
 def pixelate(pixelation_factor: int , img: Image):
     tiny = img.resize(size=[int(img.width/pixelation_factor),int(img.height/pixelation_factor)])
     return tiny
@@ -41,6 +71,17 @@ def add_random_pixels(img: Image, random_factor: int):
     print('Number of random pixels: ', num_rand_pixels)
     return img
 
+def expand_pixels(img_array: np.ndarray):
+    expanded = np.zeros((img_array.shape[0]*3, img_array.shape[1]*3))
+    for i in range(img_array.shape[0]):
+        for j in range(img_array.shape[1]):
+            expanded[i*3:(i+1)*3, j*3:(j+1)*3] = pixel_buckets(img_array[i][j])
+    return expanded
+
+# --------------
+# Main Code
+# --------------
+
 img = Image.open("input\\tonysoprano.jpg")
 img = img.convert(mode='L') # converting to greyscale
 
@@ -48,9 +89,12 @@ img = img.convert(mode='L') # converting to greyscale
 arr = np.array(img)
 
 # Performing operations
-pixelated = pixelate(12,img)  # Higher is more pixelated
-pixelated_random = add_random_pixels(pixelated,1024) # lower is more random pixels
-pixelated_binary_random = binary_threshold(pixelated_random)
+pixelated = pixelate(8,img)  # Higher is more pixelated
+pixelated_random = add_random_pixels(pixelated,2056) # lower is more random pixels
+# pixelated_binary_random = binary_threshold(pixelated_random)
+
+expanded_pixels = expand_pixels(np.array(pixelated))
+expanded_pixels = Image.fromarray(np.uint8(expanded_pixels))
 
 
-pixelated_binary_random.save(fp='output\\tonysoprano.png')
+expanded_pixels.save(fp='output\\tonysoprano.png')
