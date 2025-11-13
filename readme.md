@@ -37,3 +37,5 @@ BWB
 
 
 I did a project for my COSC523 course where I got to do the above, I implemented it here.
+
+Another idea: Make is so that we look at the extremes rather the middle. Make all those colored.

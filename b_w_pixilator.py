@@ -82,14 +82,14 @@ def expand_pixels(img_array: np.ndarray):
 # Main Code
 # --------------
 
-img = Image.open("input\\tonysoprano.jpg")
+img = Image.open("input\\sam_elliot_big_lebowski.jpg")
 img = img.convert(mode='L') # converting to greyscale
 
 # converting to a numpy array so we can set the pixel color.
 arr = np.array(img)
 
 # Performing operations
-pixelated = pixelate(8,img)  # Higher is more pixelated
+pixelated = pixelate(2,img)  # Higher is more pixelated
 pixelated_random = add_random_pixels(pixelated,2056) # lower is more random pixels
 # pixelated_binary_random = binary_threshold(pixelated_random)
 
@@ -97,4 +97,4 @@ expanded_pixels = expand_pixels(np.array(pixelated))
 expanded_pixels = Image.fromarray(np.uint8(expanded_pixels))
 
 
-expanded_pixels.save(fp='output\\tonysoprano.png')
+expanded_pixels.save(fp='output\\sam_elliot_big_lebowski.png')
