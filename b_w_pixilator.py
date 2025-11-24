@@ -11,38 +11,36 @@ from PIL import Image
 import random
 
 # --------------
+#   Constants
+# --------------
+
+b = 255
+w = 0
+patterns = np.array([
+    [[w,w,w],[w,w,w],[w,w,w]],        # bucket 0
+    [[w,w,w],[w,b,w],[w,w,w]],      # bucket 1
+    [[b,w,b],[w,w,w],[b,w,b]],# bucket 2
+    [[w,b,w],[b,b,b],[w,b,w]], # bucket 3
+    [[b,b,b],[b,w,b],[b,b,b]], # bucket 4
+    [[b,b,b],[b,b,b],[b,b,b]] # bucket 5
+], dtype=np.uint8)
+
+# patterns = np.array([
+#     [[w,w,w]],        # bucket 0
+#     [[w,w,w]],      # bucket 1
+#     [[b,w,b]],# bucket 2
+#     [[w,b,w]], # bucket 3
+#     [[b,b,b]], # bucket 4
+#     [[b,b,b]] # bucket 5
+# ], dtype=np.uint8)
+
+# --------------
 # Functions
 # --------------
 
-# Defining buckets for pixel expansion
-# Just making 4 for now.
-def pixel_buckets(pixel_value : int):
-    if pixel_value < 63:
-        return np.array([
-                        [0, 0, 0],
-                        [0, 0, 0],
-                        [0, 0, 0]
-], dtype=float)
-    elif pixel_value < 126:
-        return np.array([
-                        [255, 0, 255],
-                        [0, 0, 0],
-                        [255, 0, 255]
-], dtype=float)
-    elif pixel_value < 189:
-        return np.array([
-                        [0, 255, 0],
-                        [255, 255, 255],
-                        [0, 255, 0]
-], dtype=float)
-    elif pixel_value < 256:
-        return np.array([
-                        [255, 255, 255],
-                        [255, 255, 255],
-                        [255, 255, 255]
-], dtype=float)
-    else:
-        return 255
+def bucket_index(img):
+    bins = np.array([43, 85, 128, 170, 213, 256])
+    return np.digitize(img, bins)     # shape: (H, W)
 
 def pixelate(pixelation_factor: int , img: Image):
     tiny = img.resize(size=[int(img.width/pixelation_factor),int(img.height/pixelation_factor)])
@@ -71,30 +69,49 @@ def add_random_pixels(img: Image, random_factor: int):
     print('Number of random pixels: ', num_rand_pixels)
     return img
 
-def expand_pixels(img_array: np.ndarray):
-    expanded = np.zeros((img_array.shape[0]*3, img_array.shape[1]*3))
-    for i in range(img_array.shape[0]):
-        for j in range(img_array.shape[1]):
-            expanded[i*3:(i+1)*3, j*3:(j+1)*3] = pixel_buckets(img_array[i][j])
-    return expanded
+def expand_pixels(img_array):
+    img_array = img_array.astype(np.uint8)
+
+    idx = bucket_index(img_array)        # (H, W)
+    mapped = patterns[idx]               # (H, W, 3, 3)
+    H, W = img_array.shape
+
+    # reorder axes so blocks tile correctly:
+    # original:  H, W, bh, bw
+    # want:      H, bh, W, bw
+    mapped = mapped.transpose(0, 2, 1, 3)
+
+    # now flatten the first two and last two dimensions
+    out = mapped.reshape(H*3, W*3).astype(np.uint8)
+
+    return out
 
 # --------------
 # Main Code
 # --------------
 
-img = Image.open("input\\sam_elliot_big_lebowski.jpg")
+img = Image.open("input\\tony_soprano.jpg")
 img = img.convert(mode='L') # converting to greyscale
 
-# converting to a numpy array so we can set the pixel color.
-arr = np.array(img)
+# converting to a numpy array.
+# arr = np.array(img)
 
-# Performing operations
-pixelated = pixelate(2,img)  # Higher is more pixelated
-pixelated_random = add_random_pixels(pixelated,2056) # lower is more random pixels
-# pixelated_binary_random = binary_threshold(pixelated_random)
+# # Performing operations
+# pixelated = pixelate(4,img)  # Higher is more pixelated
+# pixelated_random = add_random_pixels(pixelated,4096) # lower is more random pixels
 
-expanded_pixels = expand_pixels(np.array(pixelated))
+# expanded_pixels = expand_pixels(np.array(pixelated))
+
+
+# print(np.array(pixelated).shape, np.array(pixelated).dtype)   # should be (H/4, W/4) uint8
+# print(expanded_pixels.shape, expanded_pixels.dtype)   # should be (H*3, W*3) uint8
+
+expanded_pixels = expand_pixels(img_array=np.array(img))
 expanded_pixels = Image.fromarray(np.uint8(expanded_pixels))
 
 
-expanded_pixels.save(fp='output\\sam_elliot_big_lebowski.png')
+print('expanded_pixels size: ', expanded_pixels.size)
+
+print('img size: ', img.size)
+
+expanded_pixels.save(fp='output\\tony_soprano.jpg')
