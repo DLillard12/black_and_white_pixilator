@@ -8,7 +8,7 @@
 # ---------------
 import numpy as np
 from PIL import Image
-import random
+import os
 
 # --------------
 #   Constants
@@ -46,16 +46,18 @@ def pixelate(pixelation_factor: int , img: Image):
     tiny = img.resize(size=[int(img.width/pixelation_factor),int(img.height/pixelation_factor)])
     return tiny
 
-
-def binary_threshold(img: Image):
-    pixels = img.load()  # Gives access to pixel data
-    for x in range(img.width):
-        for y in range(img.height):
-            if pixels[x, y] > 70: # for now just setting threshold to halfway.
-                pixels[x,y] = 255
-            else:
-                pixels[x,y] = 0
-    return img
+# this function takes a value, and moves it from its position away from 128
+def pixel_divergence(img_arr: np.array, divergence_factor: float):
+    # center the values around 0
+    centered = img_arr - 128.0
+    # scale by divergence factor
+    scaled = centered * divergence_factor
+    # re-center around 128
+    re_centered = scaled + 128.0
+    # clip to valid range
+    clipped = np.clip(re_centered, 0, 255)
+    return clipped.astype(np.uint8)
+    
 
 def add_random_pixels(img_array: np.array, random_factor: int):
     # Generate the random pixel coordinates
@@ -63,14 +65,13 @@ def add_random_pixels(img_array: np.array, random_factor: int):
     H, W = img_array.shape
     num_random_pixels = int(random_factor**1.5)
     random_pixels = rng.integers(0, [H, W], size=(num_random_pixels,2))
-    unique = np.unique(random_pixels, axis=0)
     
     # separate into x and y coords
-    x_coords = unique[:, 0]
-    y_coords = unique[:, 1]
+    x_coords = random_pixels[:, 0]
+    y_coords = random_pixels[:, 1]
 
     # now set those pixels to random black or white
-    img_array[x_coords, y_coords] = np.random.choice([0, 255], size=unique.shape[0])
+    img_array[x_coords, y_coords] = np.random.choice([0, 255], size=random_pixels.shape[0])
 
     return img_array
 
@@ -93,25 +94,48 @@ def expand_pixels(img_array):
 # Main Code
 # --------------
 
-img = Image.open("input\\tony_soprano.jpg")
-img = img.convert(mode='L') # converting to greyscale
+# img = Image.open("input\\sam_elliot_big_lebowski.jpg")
+# img = img.convert(mode='L') # converting to greyscale
 
-# converting to a numpy array.
-arr = np.array(img)
+# # Performing operations on image object
+# img_pixelated = pixelate(2,img)  # Higher is more pixelated
 
-# # Performing operations
-# pixelated = pixelate(4,img)  # Higher is more pixelated
-# pixelated_random = add_random_pixels(pixelated,4096)
+# # converting to a numpy array.
+# # Operations from now on expect a numpy array.
+# arr = np.array(img_pixelated)
 
-# expanded_pixels = expand_pixels(np.array(pixelated))
+# arr = pixel_divergence(arr, 20)
+
+# arr_random = add_random_pixels(arr, 44)
+# arr_dithered = expand_pixels(arr)
+# final_image = Image.fromarray(np.uint8(arr_dithered))
+
+# final_image.save(fp='output\\sam_elliot_big_lebowski.jpg')
 
 
-# print(np.array(pixelated).shape, np.array(pixelated).dtype)   # should be (H/4, W/4) uint8
-# print(expanded_pixels.shape, expanded_pixels.dtype)   # should be (H*3, W*3) uint8
+# moving on to videos.
 
+input_video_path = "input\\knights_fighting_frames\\"
+output_video_path = "output\\knights_fighting_frames\\"
 
-arr_random = add_random_pixels(arr, 4444)
-expanded_pixels = expand_pixels(arr)
-expanded_pixels = Image.fromarray(np.uint8(expanded_pixels))
+for fname in sorted(os.listdir(input_video_path)):
+    if not fname.endswith('.png'):
+        continue
+    
+    path = os.path.join(input_video_path, fname)
+    img = Image.open(path).convert('L')
 
-expanded_pixels.save(fp='output\\tony_soprano.jpg')
+    # Performing operations on image object
+    img_pixelated = pixelate(2,img)  # Higher is more pixelated
+
+    # converting to a numpy array.
+    # Operations from now on expect a numpy array.
+    arr = np.array(img_pixelated)
+
+    arr = pixel_divergence(arr, 10)
+
+    arr_random = add_random_pixels(arr, 8)
+    arr_dithered = expand_pixels(arr)
+    final_image = Image.fromarray(np.uint8(arr_dithered))
+   
+    final_image.save(os.path.join(output_video_path, fname))
