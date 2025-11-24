@@ -57,17 +57,23 @@ def binary_threshold(img: Image):
                 pixels[x,y] = 0
     return img
 
-def add_random_pixels(img: Image, random_factor: int):
-    width, height = img.size
+def add_random_pixels(img_array: np.array, random_factor: int):
+    # Generate the random pixel coordinates
+    rng = np.random.default_rng()
+    H, W = img_array.shape
+    num_random_pixels = int(random_factor**1.5)
+    random_pixels = rng.integers(0, [H, W], size=(num_random_pixels,2))
+    unique = np.unique(random_pixels, axis=0)
     
-    pixels = img.load()  # Gives access to pixel data
-    num_rand_pixels = random.randint(0,arr.shape[0] * arr.shape[1] // random_factor)
-    for _ in range(num_rand_pixels):
-        rand_x = random.randint(0,width-1)
-        rand_y = random.randint(0,height-1)
-        pixels[rand_x, rand_y] = random.randint(0,255)
-    print('Number of random pixels: ', num_rand_pixels)
-    return img
+    # separate into x and y coords
+    x_coords = unique[:, 0]
+    y_coords = unique[:, 1]
+
+    # now set those pixels to random black or white
+    img_array[x_coords, y_coords] = np.random.choice([0, 255], size=unique.shape[0])
+
+    return img_array
+
 
 def expand_pixels(img_array):
     img_array = img_array.astype(np.uint8)
@@ -76,9 +82,6 @@ def expand_pixels(img_array):
     mapped = patterns[idx]               # (H, W, 3, 3)
     H, W = img_array.shape
 
-    # reorder axes so blocks tile correctly:
-    # original:  H, W, bh, bw
-    # want:      H, bh, W, bw
     mapped = mapped.transpose(0, 2, 1, 3)
 
     # now flatten the first two and last two dimensions
@@ -94,11 +97,11 @@ img = Image.open("input\\tony_soprano.jpg")
 img = img.convert(mode='L') # converting to greyscale
 
 # converting to a numpy array.
-# arr = np.array(img)
+arr = np.array(img)
 
 # # Performing operations
 # pixelated = pixelate(4,img)  # Higher is more pixelated
-# pixelated_random = add_random_pixels(pixelated,4096) # lower is more random pixels
+# pixelated_random = add_random_pixels(pixelated,4096)
 
 # expanded_pixels = expand_pixels(np.array(pixelated))
 
@@ -106,12 +109,9 @@ img = img.convert(mode='L') # converting to greyscale
 # print(np.array(pixelated).shape, np.array(pixelated).dtype)   # should be (H/4, W/4) uint8
 # print(expanded_pixels.shape, expanded_pixels.dtype)   # should be (H*3, W*3) uint8
 
-expanded_pixels = expand_pixels(img_array=np.array(img))
+
+arr_random = add_random_pixels(arr, 4444)
+expanded_pixels = expand_pixels(arr)
 expanded_pixels = Image.fromarray(np.uint8(expanded_pixels))
-
-
-print('expanded_pixels size: ', expanded_pixels.size)
-
-print('img size: ', img.size)
 
 expanded_pixels.save(fp='output\\tony_soprano.jpg')
