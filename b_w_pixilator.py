@@ -118,7 +118,25 @@ def expand_pixels(img_array):
 input_video_path = "input\\knights_fighting_frames\\"
 output_video_path = "output\\knights_fighting_frames\\"
 
+pixelation_factor = 2
+divergence_factor = 10
+random_factor = 8
+
 for fname in sorted(os.listdir(input_video_path)):
+    # every 60 frames have a set chance parameters walk by one
+    frame_number = int(fname.split('_')[1].split('.')[0])
+    if frame_number % 60 == 0:
+        if np.random.rand() < 0.1:
+            step = np.random.choice([-3,3])
+            pixelation_factor = max(1, pixelation_factor + step)
+        if np.random.rand() < 0.1:
+            step = np.random.choice([-3,3])
+            divergence_factor = max(1, divergence_factor + step)
+        if np.random.rand() < 0.1:
+            step = np.random.choice([-3,3])
+            random_factor = max(1, random_factor + step)
+        print(f"New parameters at frame {fname}: pixelation_factor={pixelation_factor}, divergence_factor={divergence_factor}, random_factor={random_factor}")
+
     if not fname.endswith('.png'):
         continue
     
