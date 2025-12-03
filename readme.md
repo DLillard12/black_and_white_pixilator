@@ -39,3 +39,10 @@ BWB
 I did a project for my COSC523 course where I got to do the above, I implemented it here.
 
 Another idea: Make is so that we look at the extremes rather the middle. Make all those colored.
+
+I have used some ffmpeg for this project, it turns videos into frames and frames into videos.
+```
+video to frames: ffmpeg -i input.mp4 input/*_frames/frame_%06d.png
+
+frames to video: ffmpeg -framerate 30 -i output/*_frames/frames/frame_%06d.png -c:v libx264 -pix_fmt yuv420p -vf "pad=ceil(iw/2)\*2:ceil(ih/2)*2" output*.mp4
+```

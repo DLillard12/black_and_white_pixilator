@@ -47,13 +47,13 @@ def pixelate(pixelation_factor: int , img: Image):
     return tiny
 
 # this function takes a value, and moves it from its position away from 128
-def pixel_divergence(img_arr: np.array, divergence_factor: float):
+def pixel_divergence(img_arr: np.array, divergence_factor: float, divergence_point: float = 128.0):
     # center the values around 0
-    centered = img_arr - 128.0
+    centered = img_arr - divergence_point
     # scale by divergence factor
     scaled = centered * divergence_factor
     # re-center around 128
-    re_centered = scaled + 128.0
+    re_centered = scaled + divergence_point
     # clip to valid range
     clipped = np.clip(re_centered, 0, 255)
     return clipped.astype(np.uint8)
@@ -90,6 +90,23 @@ def expand_pixels(img_array):
 
     return out
 
+
+def robust_normalize(stat, lo, hi, eps=1e-9):
+    return np.clip((stat - lo) / (hi - lo + eps), 0.0, 1.0)
+
+def compute_divergence_factor(gray: np.ndarray, 
+                              min_df=0.0, max_df=8.0, 
+                              lo_std=5, hi_std=40, 
+                              gamma=1.2):
+    # Measure variation
+    std = float(np.std(gray))
+
+    # Normalize relative to expected std bounds
+    norm = robust_normalize(std, lo_std, hi_std)
+    norm = norm ** gamma
+
+    return min_df + (max_df - min_df) * norm
+
 # --------------
 # Main Code
 # --------------
@@ -115,27 +132,29 @@ def expand_pixels(img_array):
 
 # moving on to videos.
 
-input_video_path = "input\\knights_fighting_frames\\"
-output_video_path = "output\\knights_fighting_frames\\"
+input_video_path = "input\\mc_pocket_edition_frames\\"
+output_video_path = "output\\mc_pocket_edition_frames\\"
 
-pixelation_factor = 2
-divergence_factor = 10
+# default parameters
+pixelation_factor = 12
+divergence_factor = 4
+divergence_point = 128.0
 random_factor = 8
 
 for fname in sorted(os.listdir(input_video_path)):
     # every 60 frames have a set chance parameters walk by one
-    frame_number = int(fname.split('_')[1].split('.')[0])
-    if frame_number % 60 == 0:
-        if np.random.rand() < 0.1:
-            step = np.random.choice([-3,3])
-            pixelation_factor = max(1, pixelation_factor + step)
-        if np.random.rand() < 0.1:
-            step = np.random.choice([-3,3])
-            divergence_factor = max(1, divergence_factor + step)
-        if np.random.rand() < 0.1:
-            step = np.random.choice([-3,3])
-            random_factor = max(1, random_factor + step)
-        print(f"New parameters at frame {fname}: pixelation_factor={pixelation_factor}, divergence_factor={divergence_factor}, random_factor={random_factor}")
+    # frame_number = int(fname.split('_')[1].split('.')[0])
+    # if frame_number % 60 == 0:
+    #     if np.random.rand() < 0.1:
+    #         step = np.random.choice([-3,3])
+    #         pixelation_factor = max(1, pixelation_factor + step)
+    #     if np.random.rand() < 0.1:
+    #         step = np.random.choice([-3,3])
+    #         divergence_factor = max(1, divergence_factor + step)
+    #     if np.random.rand() < 0.1:
+    #         step = np.random.choice([-3,3])
+    #         random_factor = max(1, random_factor + step)
+    #     print(f"New parameters at frame {fname}: pixelation_factor={pixelation_factor}, divergence_factor={divergence_factor}, random_factor={random_factor}")
 
     if not fname.endswith('.png'):
         continue
@@ -144,15 +163,19 @@ for fname in sorted(os.listdir(input_video_path)):
     img = Image.open(path).convert('L')
 
     # Performing operations on image object
-    img_pixelated = pixelate(2,img)  # Higher is more pixelated
+    img_pixelated = pixelate(pixelation_factor,img)  # Higher is more pixelated
 
     # converting to a numpy array.
     # Operations from now on expect a numpy array.
     arr = np.array(img_pixelated)
 
-    arr = pixel_divergence(arr, 10)
+    # divergence_point = arr.mean()
+    # try divergence point as median
+    divergence_point = np.median(arr)
+    divergence_factor = compute_divergence_factor(arr)
+    arr = pixel_divergence(arr, divergence_factor, divergence_point)
 
-    arr_random = add_random_pixels(arr, 8)
+    arr_random = add_random_pixels(arr, random_factor)
     arr_dithered = expand_pixels(arr)
     final_image = Image.fromarray(np.uint8(arr_dithered))
    

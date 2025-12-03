@@ -1,4 +1,2 @@
-/input/knights_fighting_frames/
-/output/knights_fighting_frames/
-/input/zendaya_video_frames/
-/output/zendaya_video_frames/
+input/*_frames/
+output/*_frames/
