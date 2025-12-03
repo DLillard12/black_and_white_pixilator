@@ -9,6 +9,8 @@
 import numpy as np
 from PIL import Image
 import os
+import sys # for command line args
+
 
 # --------------
 #   Constants
@@ -102,55 +104,35 @@ def compute_divergence_factor(gray: np.ndarray,
 # Main Code
 # --------------
 
-# img = Image.open("input\\sam_elliot_big_lebowski.jpg")
-# img = img.convert(mode='L') # converting to greyscale
 
-# # Performing operations on image object
-# img_pixelated = pixelate(2,img)  # Higher is more pixelated
+def main():
 
-# # converting to a numpy array.
-# # Operations from now on expect a numpy array.
-# arr = np.array(img_pixelated)
+    # input image path
+    if len(sys.argv) < 3:
+        print("Usage: python 1_bit_image_ditherer.py <input_image_path> <output_image_path> [pixelation_factor] [random_factor] [divergence_factor] [divergence_point]")
+        return
+    input_image_path = sys.argv[1]
+    output_image_path = sys.argv[2]
 
-# arr = pixel_divergence(arr, 20)
+    # default parameters
+    pixelation_factor = 12
+    random_factor = 8
+    divergence_factor = 4
+    divergence_point = 128.0
 
-# arr_random = add_random_pixels(arr, 44)
-# arr_dithered = expand_pixels(arr)
-# final_image = Image.fromarray(np.uint8(arr_dithered))
+    if len(sys.argv) >= 4:
+        pixelation_factor = int(sys.argv[3])
+    if len(sys.argv) >= 5:
+        random_factor = int(sys.argv[4])
+    if len(sys.argv) >= 6:
+        divergence_factor = float(sys.argv[5])
+    if len(sys.argv) >= 7:
+        divergence_point = float(sys.argv[6])
 
-# final_image.save(fp='output\\sam_elliot_big_lebowski.jpg')
-
-
-# moving on to videos.
-
-input_video_path = "input\\mc_pocket_edition_frames\\"
-output_video_path = "output\\mc_pocket_edition_frames\\"
-
-# default parameters
-pixelation_factor = 12
-divergence_factor = 4
-divergence_point = 128.0
-random_factor = 8
-
-for fname in sorted(os.listdir(input_video_path)):
-    # every 60 frames have a set chance parameters walk by one
-    # frame_number = int(fname.split('_')[1].split('.')[0])
-    # if frame_number % 60 == 0:
-    #     if np.random.rand() < 0.1:
-    #         step = np.random.choice([-3,3])
-    #         pixelation_factor = max(1, pixelation_factor + step)
-    #     if np.random.rand() < 0.1:
-    #         step = np.random.choice([-3,3])
-    #         divergence_factor = max(1, divergence_factor + step)
-    #     if np.random.rand() < 0.1:
-    #         step = np.random.choice([-3,3])
-    #         random_factor = max(1, random_factor + step)
-    #     print(f"New parameters at frame {fname}: pixelation_factor={pixelation_factor}, divergence_factor={divergence_factor}, random_factor={random_factor}")
-
-    if not fname.endswith('.png'):
+    if not input_image_path.endswith('.png'):
         continue
     
-    path = os.path.join(input_video_path, fname)
+    path = os.path(input_image_path)
     img = Image.open(path).convert('L')
 
     # Performing operations on image object
@@ -167,7 +149,10 @@ for fname in sorted(os.listdir(input_video_path)):
     arr = pixel_divergence(arr, divergence_factor, divergence_point)
 
     arr_random = add_random_pixels(arr, random_factor)
-    arr_dithered = expand_pixels(arr)
+    arr_dithered = expand_pixels(arr_random)
     final_image = Image.fromarray(np.uint8(arr_dithered))
-   
-    final_image.save(os.path.join(output_video_path, fname))
+
+    final_image.save(fp=output_image_path)
+
+if __name__ == "__main__":
+    main()
