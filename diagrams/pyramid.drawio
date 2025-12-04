@@ -1,0 +1,19 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:145.0) Gecko/20100101 Firefox/145.0" version="29.2.2">
+  <diagram name="Page-1" id="mPFjXV65r5eSNUosCja8">
+    <mxGraphModel dx="1426" dy="778" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" background="light-dark(#000000, #121212)" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="spoFzSxUtc0egFg19cny-1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;gradientColor=none;fontFamily=Times New Roman;fontSize=15;" value="one_bit_image_ditherer.py" vertex="1">
+          <mxGeometry height="40" width="210" x="320" y="400" as="geometry" />
+        </mxCell>
+        <mxCell id="spoFzSxUtc0egFg19cny-2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;gradientColor=none;fontFamily=Times New Roman;fontSize=15;" value="one_bit_frames_ditherer.py" vertex="1">
+          <mxGeometry height="40" width="190" x="330" y="360" as="geometry" />
+        </mxCell>
+        <mxCell id="spoFzSxUtc0egFg19cny-4" parent="1" style="rounded=0;whiteSpace=wrap;html=1;gradientColor=none;fontFamily=Times New Roman;fontSize=15;" value="&lt;div&gt;one_bit_video_ditherer.py&lt;/div&gt;" vertex="1">
+          <mxGeometry height="40" width="170" x="340" y="320" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
